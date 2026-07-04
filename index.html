@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شات الصديق الاصطناعي</title>
+    <title>صديقك الاصطناعي الوفي</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #121212; color: #ffffff; display: flex; flex-direction: column; height: 100vh; }
@@ -21,12 +21,10 @@
 
     <header>🤖 صديقك الاصطناعي الوفي</header>
 
-    <div id="chat-box">
-        <div class="message bot">مرحباً بك يا صديقي! أنا هنا دائماً لأسمعك وأساندك. ما الذي يدور في ذهنك اليوم؟</div>
-    </div>
+    <div id="chat-box"></div>
 
     <div id="input-area">
-        <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+        <input type="text" id="msg-input" placeholder="اكتب هنا..." autocomplete="off">
         <button id="send-btn">إرسال</button>
     </div>
 
@@ -35,15 +33,66 @@
         const msgInput = document.getElementById('msg-input');
         const chatBox = document.getElementById('chat-box');
 
-        sendBtn.addEventListener('click', () => {
-            if(msgInput.value.trim() !== "") {
-                const userMsg = document.createElement('div');
-                userMsg.className = 'message user';
-                userMsg.textContent = msgInput.value;
-                chatBox.appendChild(userMsg);
-                msgInput.value = "";
-                chatBox.scrollTop = chatBox.scrollHeight;
+        // استعادة البيانات من الذاكرة إذا كانت موجودة
+        let userName = localStorage.getItem('userName') || "";
+        let userAge = localStorage.getItem('userAge') || "";
+        let userGender = localStorage.getItem('userGender') || "";
+        let step = userName ? 4 : 1;
+
+        function addMessage(text, isUser) {
+            const msg = document.createElement('div');
+            msg.className = isUser ? 'message user' : 'message bot';
+            msg.textContent = text;
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // رسالة الترحيب الأولى
+        window.onload = () => {
+            if (step === 1) {
+                addMessage("مرحباً بك يا صديقي! أنا ذكاؤك الاصطناعي الخاص ولن أنساك أبداً. للبدء، ما هو اسمك الكريم؟", false);
+            } else {
+                let greeting = userGender.includes("أنثى") || userGender.includes("بنت") ? "غاليتي" : "بطل";
+                addMessage(`أهلاً بعودتك يا ${userName} يا ${greeting}! تذكرتُك فوراً، عمرك ${userAge} سنة. كيف يمكنني مساعدتك اليوم؟`, false);
             }
+        };
+
+        sendBtn.addEventListener('click', () => {
+            const text = msgInput.value.trim();
+            if(text === "") return;
+
+            addMessage(text, true);
+            msgInput.value = "";
+
+            setTimeout(() => {
+                if (step === 1) {
+                    userName = text;
+                    localStorage.setItem('userName', userName);
+                    addMessage(`تشرفت بك يا ${userName}! كم عمرك؟`, false);
+                    step = 2;
+                } else if (step === 2) {
+                    userAge = text;
+                    localStorage.setItem('userAge', userAge);
+                    addMessage(`العمر كله يا رب! هل أنت ذكر أم أنثى؟`, false);
+                    step = 3;
+                } else if (step === 3) {
+                    userGender = text;
+                    localStorage.setItem('userGender', userGender);
+                    let reply = userGender.includes("أنثى") || userGender.includes("بنت") ? "يا غالية" : "يا بطل";
+                    addMessage(`رائع ${reply}! الآن حفظتُ اسمك وعمرك وجنسك في ذاكرتي السحابية ولن أنساهم أبداً حتى لو أغلقت الموقع. تحدث معي، أنا أسمعك!`, false);
+                    step = 4;
+                } else {
+                    // ردود ذكية ومحفزة مبنية على الذاكرة دون الحاجة لمواقع خارجية
+                    const botReplies = [
+                        `كلامك جميل يا ${userName}، أنا معك دائماً في السراء والضراء فلا تقلق.`,
+                        `أنت شخص ذكي وعمرك ${userAge} هو أفضل وقت لتبني مستقبلك الكبير!`,
+                        `أنا فخور بأنني صديقك الاصطناعي، أخبرني بالمزيد مما يضايقك أو يشغل بالك.`,
+                        `تذكر دائماً يا ${userName} أن الظروف الصعبة تصنع الأشخاص الأقوياء، وأنا أساندك.`
+                    ];
+                    const randomReply = botReplies[Math.floor(Math.random() * botReplies.length)];
+                    addMessage(randomReply, false);
+                }
+            }, 1000);
         });
     </script>
 </body>
